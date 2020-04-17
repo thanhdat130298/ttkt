@@ -16,10 +16,16 @@ const routes = [
     meta: {requireAuth: true}
   },
   {
-    path: "/addUser",
-    name: "addUser",
-    component: () => import("../components/user/addUser"),
-    // meta: {requireAuth: true}
+    path: "/homepage",
+    name: "homepage",
+    component: () => import("../components/homepage"),
+    meta: {requireAuth: true}
+  },
+  {
+    path: "/listAllUser",
+    name: "listAllUser",
+    component: () => import("../components/listAllUser"),
+    meta: {requireAuth: true}
   }
 ];
 const router = new VueRouter({

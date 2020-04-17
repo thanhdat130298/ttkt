@@ -7,12 +7,15 @@ export default new Vuex.Store({
   state: {
     name: "",
     token: "",
+    searchResult: "",
     users: [],
+    dmbhxhId: "",
+
+    length: null,
     CQ: [],
     DV: [],
     NQ: [],
     PB: [],
-
     CD: []
   },
   getters: {
@@ -21,10 +24,12 @@ export default new Vuex.Store({
     NQ: state => state.NQ,
     PB: state => state.PB,
     CQ: state => state.CQ,
-
     CD: state => state.CD
   },
   mutations: {
+    search(state, result) {
+      state.searchResult = result;
+    },
     logout(state) {
       state.token = null;
       router.push("/login");
@@ -37,8 +42,16 @@ export default new Vuex.Store({
     },
     users(state, users) {
       state.users = users;
+      
     },
-
+    length(state, length) {
+      state.length = length;
+      
+    },
+    getDmbhxhId(state,id){
+      state.dmbhxhId = id;
+      
+    },
     listDonVi(state, data) {
       state.DV = data;
     },
@@ -59,20 +72,56 @@ export default new Vuex.Store({
     fetchToken({ commit }) {
       commit("getToken", localStorage.getItem("token"));
     },
+    getIddm({commit}) {
+      commit("getDmbhxhId", localStorage.getItem("dmbhxhId"));
+    },
     logout({ commit }) {
       localStorage.removeItem("token");
+      localStorage.removeItem("dmbhxhId");
       commit("logout");
     },
 
-    getAllUser({ commit }) {
-      axios.get("http://118.69.55.188:8080/api/users").then(res => {
-        commit("users", res.data);
-        console.log(res.data);
+    async getAllUser({ commit }) {
+      await axios
+        .get(
+          "http://118.69.55.188:8080/api/users?size=1000&sort=lastModifiedDate"
+        )
+        .then(res => {          
+          commit("length", res.data.length);
+        });
+    },
+    getUserByPage({ commit }, page) {
+      axios
+        .get(
+          "http://118.69.55.188:8080/api/users?page=" +
+            page +
+            "&size=20&sort=lastModifiedDate"
+        )
+        .then(res => {
+          commit("users", res.data);
+        });
+    },
+    async searchUser({commit},data) {
+      await axios
+      .get("http://118.69.55.188:8080/api/users/search-user?dmbhxhId="+data.dmbhxhId+"&login="+data.login+"&tenHienThi="+data.tenHienThi+"&chucDanh="+data.chucDanh+"&donViCongTac="+data.tenNghiepVu+"&authorityId="+data.authorityId+"&page=0&size=100")
+      .then((res)=> {
+        var result="";
+        if(res.data.content.length==0) {
+          result = "No result!";
+          commit("search" , result);
+        }
+        else {
+          result ="";
+          commit("search", result);
+        }
+        commit("length", res.data.content.length);
+        commit("users", res.data.content);
+        
+        
         
       });
     },
     async login(state, data) {
-      
       await axios
         .post("http://118.69.55.188:8080/api/authenticate", {
           maDonVi: data.maDonVi,
@@ -88,8 +137,8 @@ export default new Vuex.Store({
           console.log(err);
         });
     },
-    
-//http://192.168.0.139:8080/
+
+    //http://192.168.0.139:8080/
     async getUnit(state, id) {
       await axios
         .get(
@@ -97,14 +146,15 @@ export default new Vuex.Store({
             id
         )
         .then(res => {
-          console.log(res.data.dmbhxh.tenDonVi);
-          
           this.commit("SAVE", res.data.dmbhxh.tenDonVi);
+          console.log(res.data);
+          
+          localStorage.setItem("dmbhxhId", res.data.dmbhxh.id)
+          
         });
     },
 
     /////////////////////
-
     getNQ() {
       axios
         .get(
@@ -113,7 +163,7 @@ export default new Vuex.Store({
         .then(res => {
           this.commit("listNhomQuyen", res.data.content);
           console.log(res.data.content);
-          console.log(res.data.content);
+          
         })
         .catch(err => {
           console.log(err);
@@ -136,8 +186,6 @@ export default new Vuex.Store({
         .get("http://118.69.55.188:8080/api/don-vi-nghiep-vus?page=0&size=1000")
         .then(res => {
           this.commit("listDonVi", res.data.content);
-          console.log(res.data.content);
-          
         })
         .catch(err => {
           console.log(err);
@@ -154,6 +202,7 @@ export default new Vuex.Store({
         });
     },
     getCD() {
+      //call ko a
       axios
         .get(
           "http://118.69.55.188:8080/api/d-m-chuc-danh-users?page=0&size=1000&dmBHXHId=1"
@@ -165,12 +214,22 @@ export default new Vuex.Store({
           console.log(err);
         });
     },
-
+    edit(state, user) {
+      axios.put("http://118.69.55.188:8080/api/users", user).then(res => {
+        console.log(res);
+      });
+    },
+    deleteUser(state, login) {
+      axios.delete("http://118.69.55.188:8080/api/users/" + login).then(res => {
+        console.log(res);
+      });
+    },
     submit(state, info) {
       axios
-        .post("http://118.69.55.188:8080/api/account/register", info)
+
+        .post("http://118.69.55.188:8080/api/users", info)
         .then(res => {
-          console.log(res);
+          console.log(res, "ok");
         })
         .catch(err => {
           console.log(err);

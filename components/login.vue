@@ -4,7 +4,7 @@
       <h2>LOGIN</h2>
 
       <p class="id">
-        <label><div class="label">ID of unit</div></label>
+        <label><div class="label">ID of unit:</div></label>
         <input
           type="text"
           name="id"
@@ -15,7 +15,7 @@
         />
       </p>
       <p class="unit">
-        <label for="unit"><div class="label">Unit</div></label>
+        <label for="unit"><div class="label">Unit:</div></label>
         <input
           type="text"
           name="id"
@@ -45,7 +45,8 @@
           placeholder="Password..."
         />
       </p>
-      <div class="err">{{err}} {{error}}</div>
+      <div class="err">{{ err }} {{ error }}</div>
+      <div class="loader" v-if="clicked"></div>
       <button v-on:click.prevent="login">LOGIN</button>
     </form>
   </div>
@@ -56,12 +57,14 @@ export default {
   name: "login",
   data() {
     return {
+      clicked: false,
       err: "",
       id: "",
       unit: "",
       password: "",
       username: "",
-      error: ""
+      error: "",
+      ok: true,
     };
   },
   methods: {
@@ -73,32 +76,68 @@ export default {
       let object = {
         username: this.username,
         password: this.password,
-        maDonVi: this.id
+        maDonVi: this.id,
       };
       if (!this.username || !this.password || !this.id) {
         this.err = "Login false!";
-      } else this.$store.dispatch("login", object);
-     
-    }
-  }
+        this.ok = false;
+      } else this.err = "";
+      if (this.ok) {
+        this.clicked = true;
+        this.$store.dispatch("login", object);
+      }
+    },
+  },
 };
 </script>
 <style scoped>
+.loader {
+  margin: 0 auto;
+  border: 5px solid #f3f3f3;
+  border-radius: 20%;
+  border-top: 5px solid #3498db;
+  width: 10px;
+  height: 10px;
+  -webkit-animation: spin 2s linear infinite; /* Safari */
+  animation: spin 2s linear infinite;
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
 button:active {
   background-color: white;
-  color: #4caf50;
+  color: #555555;
   transition: 100ms;
+  font-weight: bold;
 }
 .err {
   height: 20px;
   color: red;
+  font-weight: bold;
 }
 form {
-  box-shadow: 1px 1px 5px 5px #42b983 ;
+  background-color: rgba(190, 190, 190, 0.4);
   margin: 0 auto;
   width: 30%;
-  margin-top: 50px;
-  border: 1px solid #42b983;
+  color: white;
+  border-radius: 10px;
+  border: 1px solid #fff;
 }
 h3 {
   margin: 40px 0 0;
@@ -114,17 +153,6 @@ li {
 a {
   color: #42b983;
 }
-button {
-  width: 30%;
-  background-color: #4caf50;
-  padding: 12px 20px;
-  margin: 8px 0;
-  display: inline-block;
-  color: white;
-  border: 1px solid #fff1;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
 input {
   width: 80%;
   padding: 12px 20px;
@@ -138,7 +166,7 @@ input {
 
 button {
   width: 30%;
-  background-color: #4caf50;
+  background-color: #555555;
   color: white;
   padding: 14px 20px;
   margin: 8px 0;
@@ -146,5 +174,17 @@ button {
   border-radius: 4px;
   cursor: pointer;
 }
-
+.login {
+  
+  background-image: url("../assets/bg.jpg"); 
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  padding: 50px;
+  left: 0;
+  right: 0;
+}
 </style>

@@ -3,13 +3,20 @@
     <div class="menu_top"></div>
     <div class="content">
       <div class="menu_left">
+        <div class="left"></div>
         <div class="vertical-menu">
-          <button v-for="tab in tabs" v-bind:key="tab" v-on:click="curentTab=tab">
-            {{ tab }}
+          <button v-for="tab in tabs" v-bind:key="tab.name" v-on:click="curentTab=tab">
+            {{ tab.show }}
           </button>
           
-          <!-- <button v-on:click="logout">LOGOUT</button> -->
+          <button v-on:click="logout">LOGOUT</button>
+        </div> 
+        <!-- <div class="vertical-menu">
+          <router-link to="./homepage">HOME</router-link>
+          <router-link to="./listAllUser">LIST</router-link>
+          <button v-on:click="logout">LOGOUT</button>
         </div>
+        <router-view></router-view> -->
       </div>
         <keep-alive><component class="right" v-bind:is="selected"></component></keep-alive>
     </div>
@@ -27,13 +34,13 @@ export default {
   data() {
     return {
       show: false,
-      curentTab: "homepage",
-      tabs: ["homepage", "listAllUser"]
+      curentTab: {name: "homepage"},
+      tabs: [{name: "homepage", show: "HOME"},{name: "listAllUser", show: "LIST"}]
     };
   },
   computed: {
     selected() {
-      return this.curentTab;
+      return this.curentTab.name;
     }
   },
   methods: {
@@ -50,21 +57,26 @@ export default {
   background-color: #4caf50;
 }
 .menu_left {
+  width: 15%;
   float: left;
-  width: 20%;
+  height: 700px;
+}
+.left {
+  position: fixed;
+  width: 15%;
+  left: 0;
+  top: 0;
   height: 1000px;
-  margin: 1%;
-  margin-top: 1.5%;
   background-color: #4caf50;
 }
 .right {
   margin: 1.5%;
   float: left;
-  width: 75%;
+  width: 80%;
 }
 .vertical-menu {
   position: fixed;
-  width: 20%;
+  width: 15%;
   margin: 0 auto;
   padding-bottom: 2%;
 }
@@ -72,7 +84,8 @@ button,
 .button {
   font-size: 17px;
   border: 1px solid white;
-  width: 99%;
+  width: 100%;
+  outline: none;
   margin: 0 auto;
 }
 .button {
