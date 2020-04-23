@@ -1,9 +1,10 @@
 <template>
   <div>
     <div class="butHead">
-      
       <button v-on:click="checkAdd = true" class="butAdd">ADD USER</button>
-      <button class="butSearch" v-on:click="showSearch=true"><img src="../assets/search.png"></button>
+      <button class="butSearch" v-on:click="showSearch = true">
+        <img src="../assets/search.png" />
+      </button>
     </div>
     <div>
       <!-- Add user component -->
@@ -17,28 +18,40 @@
       </div>
     </div>
     <div>
-
-      <keep-alive><search class="search_component" v-if="showSearch"  v-on:x="showSearch = $event"></search></keep-alive>
+      <search
+        class="search_component"
+        v-if="showSearch"
+        v-on:x="showSearch = $event"
+        v-bind:currentPage="currentPage"
+      ></search>
     </div>
     <!-- pagination component -->
-    <pagination v-bind:length="length" v-if="wait"></pagination> 
+    <pagination
+      :total-pages="length"
+      :current-page="currentPage"
+      v-model="currentPage"
+      @pagechanged="onPageChange" 
+      v-if="wait"
+    />
     <!-- List user -->
     <table id="customers">
       <thead>
         <tr>
           <th>ID</th>
-          <th>TÊN</th>
+          <th>LOGIN</th>
+          <th>TÊN HIỂN THỊ</th>
           <th>CHỨC DANH</th>
-          <th>CO QUAN</th>
+          <th>CƠ QUAN</th>
           <th>TỈNH HUYỆN</th>
           <th>NHÓM QUYỀN</th>
-          <th>DON VI NGHIEP VU</th>
+          <th>ĐƠN VỊ NGHIỆP VỤ</th>
           <th>ACTION</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="user in users" v-bind:key="user.id">
           <td>{{ user.id }}</td>
+          <td>{{ user.login }}</td>
           <td>{{ user.tenHienThi }}</td>
           <td>{{ user.chucDanh }}</td>
           <td>{{ user.donVi }}</td>
@@ -78,7 +91,8 @@
         </tr>
       </tbody>
     </table>
-      <div class="loader" v-if="loader" ></div>
+    <div class="loader" v-if="loader"></div>
+    
   </div>
 </template>
 <script>
@@ -90,12 +104,15 @@ export default {
   name: "listAllUser",
   data() {
     return {
+      totalPage:null,
+      total: null,
+      currentPage: 0,
       loader: false,
       checkAdd: false,
       checkEdit: false,
       id: null,
-      wait: false,
-      page: null,
+      wait: true,
+      page: 0,
       showSearch: false,
     };
   },
@@ -103,37 +120,45 @@ export default {
     search,
     addUser,
     editUser,
-    pagination
+    pagination,
   },
   computed: {
     users() {
       return this.$store.getters.users;
     },
     length() {
-      console.log(this.$store.state.length);
-      return this.$store.state.length;
-    }
+      let a = parseInt(this.$store.state.length/25);
+        return a;
+    },
   },
   methods: {
+    onPageChange(page) {
+      
+      this.currentPage = page;
+      console.log(page,"currentpage2");
+      this.$store.dispatch("getUserByPage", this.currentPage);
+    },
     getId(id) {
       this.id = id;
     },
     deleteUser(login) {
       this.$store.dispatch("deleteUser", login);
-      location.reload();
-    }
+      this.$store.dispatch("getUserByPage", this.currentPage);
+    },
   },
   async created() {
+
+    // this.wait = true; //wait get length to set pagin
     this.loader = true;
     await this.$store.dispatch("getAllUser");
-    this.loader =false;
-    this.wait = true;//wait get length to set pagin
-  }
+      this.$store.dispatch("getUserByPage", this.currentPage);
+    this.loader = false;
+  },
 };
 </script>
 <style scoped>
 .loader {
-  margin-top:10px;
+  margin-top: 10px;
   margin: 0 auto;
   border: 5px solid #4caf50;
   border-radius: 50%;

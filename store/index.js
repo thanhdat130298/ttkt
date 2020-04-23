@@ -46,6 +46,8 @@ export default new Vuex.Store({
     },
     length(state, length) {
       state.length = length;
+      console.log(state.length,"length");
+      
       
     },
     getDmbhxhId(state,id){
@@ -86,7 +88,9 @@ export default new Vuex.Store({
         .get(
           "http://118.69.55.188:8080/api/users?size=1000&sort=lastModifiedDate"
         )
-        .then(res => {          
+        .then(res => { 
+          console.log(res.data.length);
+                   
           commit("length", res.data.length);
         });
     },
@@ -95,26 +99,35 @@ export default new Vuex.Store({
         .get(
           "http://118.69.55.188:8080/api/users?page=" +
             page +
-            "&size=20&sort=lastModifiedDate"
+            "&size=25&sort=lastModifiedDate"
         )
         .then(res => {
           commit("users", res.data);
         });
     },
+    async searchAll({commit},data) {
+      await axios 
+      .get("http://118.69.55.188:8080/api/users/search-user?dmbhxhId="+data.dmbhxhId+"&login="+data.login+"&tenHienThi="+data.tenHienThi+"&chucDanh="+data.chucDanh+"&donViCongTac="+data.tenNghiepVu+"&authorityId="+data.authorityId+"&size=1000")
+      .then((res) => {
+        commit("length", res.data.content.length);
+      })
+    },
     async searchUser({commit},data) {
       await axios
-      .get("http://118.69.55.188:8080/api/users/search-user?dmbhxhId="+data.dmbhxhId+"&login="+data.login+"&tenHienThi="+data.tenHienThi+"&chucDanh="+data.chucDanh+"&donViCongTac="+data.tenNghiepVu+"&authorityId="+data.authorityId+"&page=0&size=100")
+      .get("http://118.69.55.188:8080/api/users/search-user?dmbhxhId="+data.dmbhxhId+"&login="+data.login+"&tenHienThi="+data.tenHienThi+"&chucDanh="+data.chucDanh+"&donViCongTac="+data.tenNghiepVu+"&authorityId="+data.authorityId+"&page="+data.page+"&size=25")
       .then((res)=> {
         var result="";
+        console.log(res.data);
+        
         if(res.data.content.length==0) {
           result = "No result!";
+          
           commit("search" , result);
         }
         else {
           result ="";
           commit("search", result);
         }
-        commit("length", res.data.content.length);
         commit("users", res.data.content);
         
         

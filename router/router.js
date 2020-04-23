@@ -10,6 +10,11 @@ const routes = [
     component: () => import("../components/login")
   },
   {
+    path: "/pagination",
+    name: "pagination",
+    component: () => import("../components/pagination")
+  },
+  {
     path: "/home",
     name: "home",
     component: () => import("../components/home"),
